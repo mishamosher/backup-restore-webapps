@@ -179,7 +179,9 @@ warnDestructive() {
   echo "=== WARNING ===
 The execution of this script can irreversibly:
 - Delete historical backups in ${BACKUP_DIR}
+- Delete historical backups in the cloud storage folder
 - Delete the folder/db that is going to be restored
+- Delete contents from the destination sync directory
 
 If the risk is too high, please keep an extra working backup in a separate folder.
 
