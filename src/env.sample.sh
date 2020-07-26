@@ -48,7 +48,7 @@ mysqldumpGzip() {
 # - $1   Time specification to delete all files with the condition «older than». See here for supported units: https://rclone.org/filtering/#max-age-don-t-transfer-any-file-older-than-this
 # - [$2] Remote path to clean (by default, the root path). Please don't use a leading '/': "/path/to/folder" (INVALID), "path/to/folder" (VALID).
 cleanRclone() {
-  rclone --min-age "$1" delete "${RCLONE_NAME}:$2" --rmdirs
+  rclone --min-age "$1" delete "${RCLONE_NAME}:$2" --rmdirs --progress
 }
 
 # Generates a backup of a folder and uploads it to a cloud storage provider
