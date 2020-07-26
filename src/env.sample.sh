@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Serves as a shared functionality file for different backup/restore operations
-# Specific requirements: pv rclone mysqldump
+# Specific requirements: pv rclone mysqldump rsync
 
 # Please set all the variables below to appropriate values/functions
 
@@ -33,7 +33,7 @@ tarSplit() {
   local TAR_REALPATH=$(realpath "$1")
   local TAR_BASENAME="./$(basename "${TAR_REALPATH}")"
   local TAR_DIRNAME=$(dirname "${TAR_REALPATH}")
-  tar --selinux --xattrs --same-owner -cpzf - -C "${TAR_DIRNAME}" "${TAR_BASENAME}" | pv | split --bytes="${SPLIT_SIZE}" - "$2"
+  tar --selinux --acls --xattrs --same-owner -cpzf - -C "${TAR_DIRNAME}" "${TAR_BASENAME}" | pv | split --bytes="${SPLIT_SIZE}" - "$2"
 }
 
 # Generates a splitted compressed gz of a MySQL db
@@ -45,9 +45,10 @@ mysqldumpGzip() {
 }
 
 # Cleans up the cloud storage folder
-# - $1 Time specification to delete all files with the condition «older than». See here for supported units: https://rclone.org/filtering/#max-age-don-t-transfer-any-file-older-than-this
+# - $1   Time specification to delete all files with the condition «older than». See here for supported units: https://rclone.org/filtering/#max-age-don-t-transfer-any-file-older-than-this
+# - [$2] Remote path to clean (by default, the root path). Please don't use a leading '/': "/path/to/folder" (INVALID), "path/to/folder" (VALID).
 cleanRclone() {
-  rclone --min-age "$1" delete "${RCLONE_NAME}:" --rmdirs
+  rclone --min-age "$1" delete "${RCLONE_NAME}:$2" --rmdirs --progress
 }
 
 # Generates a backup of a folder and uploads it to a cloud storage provider
@@ -113,7 +114,7 @@ restorePath() {
 
   if [ "$(hasFiles "${LOCAL_BACKUP_PATH}")" -eq 1 ]; then
     rm -rf "${RESTORE_REALPATH}"
-    cat "${LOCAL_BACKUP_PATH}"* | pv | tar --selinux --xattrs --same-owner -xpzf - -C "$(dirname "${RESTORE_REALPATH}")"
+    cat "${LOCAL_BACKUP_PATH}"* | pv | tar --selinux --acls --xattrs --same-owner -xpzf - -C "$(dirname "${RESTORE_REALPATH}")"
   else
     echo "There is no backup called \"${RESTORE_NAME}/$2\" (local or remote). No restoration will be performed."
   fi
@@ -150,6 +151,16 @@ restoreSql() {
   echo "Restoration of db \"$1\" finished!"
 }
 
+# Syncs two paths. The paths must point to a directory. The destination path can not be the root ("/") directory. Both paths must reside in different parent directories.
+# Please use with care, as the destination path will be left identical to the origin (deleting paths absent in the origin in the process)
+# - $1 A relative or absolute origin path
+# - $2 A relative or absolute destination path. Will be created if doesn't exist. Please skip the basename of $1, as it is always automatically used.
+syncPaths() {
+  local SYNC_ORIGIN_REALPATH=$(realpath "$1")
+  local SYNC_DESTINATION_REALPATH=$(realpath "$2")
+  rsync -aAX --delete --force -v "${SYNC_ORIGIN_REALPATH}" "${SYNC_DESTINATION_REALPATH}/"
+}
+
 PIDS=()
 
 # Starts an asynchronous task and saves the corresponding PID
@@ -168,7 +179,9 @@ warnDestructive() {
   echo "=== WARNING ===
 The execution of this script can irreversibly:
 - Delete historical backups in ${BACKUP_DIR}
+- Delete historical backups in the cloud storage folder
 - Delete the folder/db that is going to be restored
+- Delete contents from the destination sync directory
 
 If the risk is too high, please keep an extra working backup in a separate folder.
 
