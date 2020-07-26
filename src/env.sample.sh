@@ -158,7 +158,7 @@ restoreSql() {
 syncPaths() {
   local SYNC_ORIGIN_REALPATH=$(realpath "$1")
   local SYNC_DESTINATION_REALPATH=$(realpath "$2")
-  rsync -aX --delete --force -v "$1" "$2/"
+  rsync -aX --delete --force -v "${SYNC_ORIGIN_REALPATH}" "${SYNC_DESTINATION_REALPATH}/"
 }
 
 PIDS=()
