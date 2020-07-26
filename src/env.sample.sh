@@ -33,7 +33,7 @@ tarSplit() {
   local TAR_REALPATH=$(realpath "$1")
   local TAR_BASENAME="./$(basename "${TAR_REALPATH}")"
   local TAR_DIRNAME=$(dirname "${TAR_REALPATH}")
-  tar --selinux --xattrs --same-owner -cpzf - -C "${TAR_DIRNAME}" "${TAR_BASENAME}" | pv | split --bytes="${SPLIT_SIZE}" - "$2"
+  tar --selinux --acls --xattrs --same-owner -cpzf - -C "${TAR_DIRNAME}" "${TAR_BASENAME}" | pv | split --bytes="${SPLIT_SIZE}" - "$2"
 }
 
 # Generates a splitted compressed gz of a MySQL db
@@ -114,7 +114,7 @@ restorePath() {
 
   if [ "$(hasFiles "${LOCAL_BACKUP_PATH}")" -eq 1 ]; then
     rm -rf "${RESTORE_REALPATH}"
-    cat "${LOCAL_BACKUP_PATH}"* | pv | tar --selinux --xattrs --same-owner -xpzf - -C "$(dirname "${RESTORE_REALPATH}")"
+    cat "${LOCAL_BACKUP_PATH}"* | pv | tar --selinux --acls --xattrs --same-owner -xpzf - -C "$(dirname "${RESTORE_REALPATH}")"
   else
     echo "There is no backup called \"${RESTORE_NAME}/$2\" (local or remote). No restoration will be performed."
   fi
@@ -158,7 +158,7 @@ restoreSql() {
 syncPaths() {
   local SYNC_ORIGIN_REALPATH=$(realpath "$1")
   local SYNC_DESTINATION_REALPATH=$(realpath "$2")
-  rsync -aX --delete --force -v "${SYNC_ORIGIN_REALPATH}" "${SYNC_DESTINATION_REALPATH}/"
+  rsync -aAX --delete --force -v "${SYNC_ORIGIN_REALPATH}" "${SYNC_DESTINATION_REALPATH}/"
 }
 
 PIDS=()
