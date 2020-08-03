@@ -151,7 +151,7 @@ restoreSql() {
   echo "Restoration of db \"$1\" finished!"
 }
 
-# Syncs two paths. The paths must point to a directory. The destination path can not be the root ("/") directory. Both paths must reside in different parent directories.
+# Syncs two paths. The paths must point to a directory. Both paths can not be the root ("/") directory. Both paths must reside in different parent directories.
 # Please use with care, as the destination path will be left identical to the origin (deleting paths absent in the origin in the process)
 # - $1 A relative or absolute origin path
 # - $2 A relative or absolute destination path. Will be created if doesn't exist. Please skip the basename of $1, as it is always automatically used.
