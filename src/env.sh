@@ -156,6 +156,7 @@ restoreSql() {
 # - $1 A relative or absolute origin path
 # - $2 A relative or absolute destination path. Will be created if doesn't exist. Please skip the basename of $1, as it is always automatically used.
 syncPaths() {
+  mkdir -p "$2"
   local SYNC_ORIGIN_REALPATH=$(realpath "$1")
   local SYNC_DESTINATION_REALPATH=$(realpath "$2")
   rsync -aAX --delete --force -v "${SYNC_ORIGIN_REALPATH}" "${SYNC_DESTINATION_REALPATH}/"
