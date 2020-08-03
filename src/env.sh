@@ -3,26 +3,7 @@
 # Serves as a shared functionality file for different backup/restore operations
 # Specific requirements: pv rclone mysqldump rsync
 
-# Please set all the variables below to appropriate values/functions
-
-!ERROR! # This line is deliberately here to cause an error. Please personalize the env.sample.sh script to fit your needs, remove this line, and rename the script to env.sh.
-
-# A timestamp for all the backups that will be created. Defaults to current UTC date&time in the 2020-07-23T16-29-07Z format.
-TIMESTAMP=$(date -u "+%FT%H-%M-%SZ")
-
-# A temporary file (auto-deleted on script completion or interruption) that contains the MySQL password for DB backups.
-MySQL_DEFAULTS_FILE=$(mktemp)
-printf "[client]\npassword=\"PASSWORD\"\n" >"${MySQL_DEFAULTS_FILE}"
-trap 'rm -f "${MySQL_DEFAULTS_FILE}"' EXIT SIGHUP SIGINT SIGQUIT SIGTERM
-
-# Maximum size for backup files. See here for supported units: https://www.gnu.org/software/coreutils/split
-SPLIT_SIZE="1000M"
-
-# Name of the rclone pre-configured remote where to upload the backups
-RCLONE_NAME="rclone-remote"
-
-# Local directory used for backups (creation and restoration)
-BACKUP_DIR="/mnt/backups"
+source "$(dirname "$0")/conf.sh"
 
 # From here onwards there is nothing to configure. Please modify with care.
 
@@ -151,11 +132,12 @@ restoreSql() {
   echo "Restoration of db \"$1\" finished!"
 }
 
-# Syncs two paths. The paths must point to a directory. The destination path can not be the root ("/") directory. Both paths must reside in different parent directories.
+# Syncs two paths. The paths must point to a directory. Both paths can not be the root ("/") directory. Both paths must reside in different parent directories.
 # Please use with care, as the destination path will be left identical to the origin (deleting paths absent in the origin in the process)
 # - $1 A relative or absolute origin path
 # - $2 A relative or absolute destination path. Will be created if doesn't exist. Please skip the basename of $1, as it is always automatically used.
 syncPaths() {
+  mkdir -p "$2"
   local SYNC_ORIGIN_REALPATH=$(realpath "$1")
   local SYNC_DESTINATION_REALPATH=$(realpath "$2")
   rsync -aAX --delete --force -v "${SYNC_ORIGIN_REALPATH}" "${SYNC_DESTINATION_REALPATH}/"
