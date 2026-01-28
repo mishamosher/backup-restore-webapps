@@ -51,6 +51,7 @@ backupPath() {
   mkdir -p "${BACKUP_DIR}/dir/${BACKUP_NAME}/${TIMESTAMP}"
   tarSplit "${BACKUP_REALPATH}" "${BACKUP_DIR}/dir/${BACKUP_NAME}/${TIMESTAMP}/compressed.tar.lz4."
   rclone copy "${BACKUP_DIR}/dir/${BACKUP_NAME}" "${RCLONE_NAME}:${RCLONE_PATH_PREFIX}dir/${BACKUP_NAME}" --progress --checksum
+  if [ -n "$NO_LOCAL_COPY" ]; then rm -rf "${BACKUP_DIR}/dir/${BACKUP_NAME}"; fi
   echo "Backup of path \"${BACKUP_REALPATH}\" finished!"
 }
 
@@ -65,6 +66,7 @@ backupMySQL() {
   mkdir -p "${BACKUP_DIR}/mysql/${BACKUP_NAME}/${TIMESTAMP}"
   mysqldumpLZ4 "$1" "${BACKUP_DIR}/mysql/${BACKUP_NAME}/${TIMESTAMP}/db.sql.lz4."
   rclone copy "${BACKUP_DIR}/mysql/${BACKUP_NAME}" "${RCLONE_NAME}:${RCLONE_PATH_PREFIX}mysql/${BACKUP_NAME}" --progress --checksum
+  if [ -n "$NO_LOCAL_COPY" ]; then rm -rf "${BACKUP_DIR}/mysql/${BACKUP_NAME}"; fi
   echo "Backup of MySQL db \"$1\" finished!"
 }
 
@@ -79,6 +81,7 @@ backupDocker() {
   mkdir -p "${BACKUP_DIR}/docker/${BACKUP_NAME}/${TIMESTAMP}"
   dockerSaveLZ4 "$1" "${BACKUP_DIR}/docker/${BACKUP_NAME}/${TIMESTAMP}/image.tar.lz4."
   rclone copy "${BACKUP_DIR}/docker/${BACKUP_NAME}" "${RCLONE_NAME}:${RCLONE_PATH_PREFIX}docker/${BACKUP_NAME}" --progress --checksum
+  if [ -n "$NO_LOCAL_COPY" ]; then rm -rf "${BACKUP_DIR}/docker/${BACKUP_NAME}"; fi
   echo "Backup of Docker image \"$1\" finished!"
 }
 
@@ -215,7 +218,9 @@ The execution of this script can irreversibly:
 
 If the risk is too high, please keep an extra working backup in a separate folder.
 
-You can pass the --no-warn option (in any position) to skip this warning.
+You can pass the --no-warn option (in any position) to skip this warning. Can also be permanently set in conf.sh (NO_WARN).
+
+You can pass the --no-local-copy option (in any position) so no backups are kept in the local storage after the script ends. Can also be permanently set in conf.sh (NO_LOCAL_COPY).
 
 Press the the key 'c' to continue, any other key to exit.
 === WARNING ==="
@@ -227,6 +232,9 @@ for ((i = 1; i <= $#; i++)); do
   case "${!i}" in
   "--no-warn")
     NO_WARN=1
+    ;;
+  "--no-local-copy")
+    NO_LOCAL_COPY=1
     ;;
   *)
     ARGS+=("${!i}")
