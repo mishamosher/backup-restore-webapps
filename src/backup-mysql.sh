@@ -6,9 +6,9 @@
 source "$(dirname "$0")/env.sh"
 
 showUsage() {
-  echo 'backup-sql.sh - backups a MySQL database and uploads it to a cloud storage provider
+  echo 'backup-mysql.sh - backups a MySQL database and uploads it to a cloud storage provider
 
-usage: backup-sql.sh SOURCE [REMOTE]
+usage: backup-mysql.sh SOURCE [REMOTE]
 
 Parameters:
  SOURCE  Required. Name of the database to backup.
@@ -17,9 +17,9 @@ Parameters:
 Options:
  --no-warn  Skip warnings
 
-example: backup-sql.sh "my_db"
-example: backup-sql.sh "my_db" "alternative_name"
-example: backup-sql.sh "my_db" "alternative_name" --no-warn'
+example: backup-mysql.sh "my_db"
+example: backup-mysql.sh "my_db" "alternative_name"
+example: backup-mysql.sh "my_db" "alternative_name" --no-warn'
 }
 
 if [ ${#ARGS[*]} -eq 0 ] || [ ${#ARGS[*]} -gt 2 ]; then
@@ -27,4 +27,4 @@ if [ ${#ARGS[*]} -eq 0 ] || [ ${#ARGS[*]} -gt 2 ]; then
   exit 0
 fi
 
-backupSql "${ARGS[@]}"
+backupMySQL "${ARGS[@]}"

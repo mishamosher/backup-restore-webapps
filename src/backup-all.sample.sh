@@ -12,15 +12,18 @@ source "$(dirname "$0")/env.sh"
 asyncTask backupPath "/var/www/html/site_a"
 
 # Backup SiteA db
-asyncTask backupSql "site_a"
+asyncTask backupMySQL "site_a"
 
 # Backup SiteB wwwroot
 asyncTask backupPath "/var/www/html/site_a"
 
 # Backup SiteB db
-asyncTask backupSql "site_a"
+asyncTask backupMySQL "site_a"
 
 # Wait all the pending tasks
 waitPids
+
+# Clear all remote backups that are older than 2 months.
+cleanRclone 2M
 
 echo "All tasks completed!"
