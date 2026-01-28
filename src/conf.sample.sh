@@ -18,5 +18,10 @@ SPLIT_SIZE="1000M"
 # Name of the rclone pre-configured remote where to upload the backups
 RCLONE_NAME="rclone-remote"
 
+# Prefix to use when transferring data to/from the rclone remote. Should start *without* a path delimiter, and end *with* a path delimiter.
+# Valid: prefix/path/
+# Invalid: /prefix/path
+RCLONE_PATH_PREFIX=""
+
 # Local directory used for backups (creation and restoration)
 BACKUP_DIR="/mnt/backups"

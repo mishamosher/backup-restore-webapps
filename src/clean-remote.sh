@@ -17,8 +17,8 @@ Parameters:
 Options:
  --no-warn  Skip warnings
 
-example: clean-remote.sh "2W"
-example: clean-remote.sh "2W" "sql"'
+example: clean-remote.sh "2w"
+example: clean-remote.sh "2w" "sql"'
 }
 
 if [ ${#ARGS[*]} -eq 0 ] || [ ${#ARGS[*]} -gt 2 ]; then
