@@ -25,3 +25,9 @@ RCLONE_PATH_PREFIX=""
 
 # Local directory used for backups (creation and restoration)
 BACKUP_DIR="/mnt/backups"
+
+# A warning about data loss is shown everytime this scripts runs. Set this variable to any non-empty value to turn off this warning. Can also be controlled in runtime (--no-warn).
+NO_WARN=""
+
+# By default a single local backup is preserved in local storage. Set this variable to any non-empty value so no local backups are kept. Can also be controlled in runtime (--no-local-copy).
+NO_LOCAL_COPY=""
